@@ -450,7 +450,7 @@ class SVGRenderer(object):
             colorString = '#' + colorString[1]*2 + colorString[2]*2 + colorString[3]*2
 
         try:
-            color = colors.toColor(colorString)
+            color = pu.safeToColor(colorString)
         except ValueError as e:
             logger.warning("SVGRenderer::parseColor> toColor for " + colorString + " raised " + str(e))
             color = colors.black

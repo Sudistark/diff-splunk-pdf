@@ -6,6 +6,7 @@ import traceback
 import xml.sax.saxutils as su
 import splunk.safe_lxml_etree as et
 
+from reportlab.lib import colors
 from splunk import getSplunkLoggingConfig, setupSplunkLogger
 import splunk.search
 import splunk.rest as rest
@@ -493,3 +494,30 @@ def makeReportName(pattern=None, type=None, reportProps={}):
 def logErrorAndTrace(errorMsg):
     logger.error("%s" % errorMsg)
     logger.debug("%s\n%s" % (errorMsg, traceback.format_exc()))
+
+def safeToColor(colorString):
+    """
+    SPL-228720 - colors.toColor has an unpatched remote code execution 
+    vulnerability, so we need to only parse certain types of color strings.
+
+    We allow for 3 types of strings:
+    - color names (eg. "red", "blue", "green")
+    - CSS colors (eg. "rgb(1, 2, 3)", "hsla(1, 20%, 40%, 0.5)")
+    - hex colors (eg. "#FFF", "#123456")
+
+    Anything else will throw an error
+    """
+    color = str.strip(colorString).lower()
+
+    parsedColor = colors.cssParse(color)
+    if parsedColor:
+        return parsedColor
+    
+    namedColors = colors.getAllNamedColors()
+    if color in namedColors:
+        return namedColors[color]
+    
+    try:
+        return colors.HexColor(color)
+    except:
+        raise ValueError('Invalid color value %r. Please specify a color name, CSS color, or hex color' % colorString)

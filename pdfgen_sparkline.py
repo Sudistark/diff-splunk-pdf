@@ -37,7 +37,7 @@ class Color(object):
     def __init__(self, range, colorString, defaultColor='black'):
         self._min = -sys.maxsize - 1
         self._max = sys.maxsize
-        self._color = colors.toColor(defaultColor)
+        self._color = pu.safeToColor(defaultColor)
         colorRange = range.split(':')
         try:
             if len(colorRange) == 1:
@@ -48,7 +48,7 @@ class Color(object):
                 if colorRange[1]:
                     self._max = int(colorRange[1])
 
-            self._color = colors.toColor(colorString)
+            self._color = pu.safeToColor(colorString)
         except ValueError as e:
             logger.warning(
                 "Sparkline::Color.__init__> toColor for %s raised %s fallback to use default color(black)" % (
@@ -126,8 +126,8 @@ class Line(Base):
 
     def __init__(self, data, options):
         Base.__init__(self, data, options)
-        self._lineColor = colors.toColor(self._options.get('lineColor', self._DEFAULT_COLOR))
-        self._fillColor = colors.toColor(self._options['fillColor']) if 'fillColor' in self._options else None
+        self._lineColor = pu.safeToColor(self._options.get('lineColor', self._DEFAULT_COLOR))
+        self._fillColor = pu.safeToColor(self._options['fillColor']) if 'fillColor' in self._options else None
 
     def _doDraw(self, width, height):
         deltaWidth = old_div(width, (self._dataCnt - 1))
@@ -163,7 +163,7 @@ class Line(Base):
 # Bar chart, the only support options are [colorMap,barColor]
 class Bar(Base):
     _barSpacing = 0.4
-    _DEFAULT_COLOR = colors.toColor("#006d9c")
+    _DEFAULT_COLOR = pu.safeToColor("#006d9c")
     _MAX_BAR_WIDTH = 3
 
     def __init__(self, data, options):
@@ -191,7 +191,7 @@ class Bar(Base):
             for k, v in list(self._options['colorMap'].items()):
                 self._colorMap.append(Color(k, v))
         if 'barColor' in self._options:
-            self._barColor = colors.toColor(self._options['barColor'])
+            self._barColor = pu.safeToColor(self._options['barColor'])
             logger.debug("Sparkline::Bar._buildColorMap> set bar color to %s" % self._options['barColor'])
 
     def _findColor(self, value):
@@ -208,12 +208,12 @@ class Discrete(Base):
     _LINE_HEIGHT = 2.5
     _LINE_WIDTH = 0.6
     _MAX_WIDTH = 3
-    _DEFAULT_COLOR = colors.toColor("#5cc05c")
+    _DEFAULT_COLOR = pu.safeToColor("#5cc05c")
 
     def __init__(self, data, options):
         Base.__init__(self, data, options)
         if 'lineColor' in self._options:
-            self._lineColor = colors.toColor(self._options['lineColor'])
+            self._lineColor = pu.safeToColor(self._options['lineColor'])
         else:
             self._lineColor = self._DEFAULT_COLOR
 
